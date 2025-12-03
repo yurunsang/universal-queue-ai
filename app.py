@@ -166,9 +166,59 @@ st.sidebar.caption("Model version: per-ride RandomForest models")
 # ==========================================================
 st.subheader("🤖 Predict & Plan Your Day")
 
+# 🧠 Info about weather forecast limits
+st.info("ℹ️ The app can only retrieve real weather forecasts up to **7 days ahead**. "
+        "If your selected date is beyond that range, results are modeled based on historical crowd data only.")
+
 lat, lon = 28.4745, -81.4717
 temp_f, rain_prob = get_weather_forecast(lat, lon, selected_date)
-st.info(f"🌤 Forecast for {selected_date}: **{temp_f}°F**, 🌧️ Rain Probability: **{rain_prob}%**")
+
+# 🌤 Sleek Glass Weather Widget
+st.markdown(
+    f"""
+    <div style="
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.25);
+        border-radius: 15px;
+        border: 1px solid rgba(255,255,255,0.2);
+        box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+        padding: 1.2rem 1.5rem;
+        margin: 1rem 0 1.5rem 0;
+        color: #222;
+        text-align: center;
+    ">
+        <h3 style="margin-bottom:0.2rem; font-weight:700; font-size:1.4rem;">
+            ☀️ Weather Forecast
+        </h3>
+        <p style="margin:0.2rem 0; font-size:1.05rem;">
+            <b>{selected_date.strftime('%A, %b %d, %Y')}</b>
+        </p>
+        <div style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin-top: 0.6rem;
+        ">
+            <div style="text-align:center;">
+                <div style="font-size:2rem;">🌡️</div>
+                <div style="font-size:1.2rem; font-weight:600;">{temp_f}°F</div>
+                <div style="font-size:0.85rem; opacity:0.7;">Temperature</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="font-size:2rem;">🌧️</div>
+                <div style="font-size:1.2rem; font-weight:600;">{rain_prob}%</div>
+                <div style="font-size:0.85rem; opacity:0.7;">Rain Chance</div>
+            </div>
+        </div>
+        <p style="margin-top:0.8rem; font-size:0.9rem; opacity:0.8;">
+            Forecast sourced from Open-Meteo (7-day range)
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 
 def infer_holiday_flags(selected_date):
     us_holidays = holidays.country_holidays('US', subdiv='FL', years=[selected_date.year])
@@ -232,9 +282,7 @@ if len(pred_results) > 0:
         unsafe_allow_html=True
     )
 
-    # ------------------------------------------------------
     # 📊 Predicted Wait Times
-    # ------------------------------------------------------
     st.subheader("📊 Predicted Wait Times by Ride")
     fig_bar = px.bar(
         optimized_route,
@@ -249,9 +297,7 @@ if len(pred_results) > 0:
     fig_bar.update_layout(height=600, xaxis_title="Wait (minutes)", yaxis_title="")
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    # ------------------------------------------------------
     # 🕓 Timeline
-    # ------------------------------------------------------
     st.subheader("🕓 Recommended Day Schedule")
     start_time = datetime.combine(selected_date, datetime.strptime("09:00", "%H:%M").time())
     total_time = 0
@@ -313,12 +359,14 @@ st.sidebar.markdown(
         <p><b>{crowd_level}</b><br>
         based on historical averages, weather, and holiday patterns.</p>
         <br>
-        <p>© 2025 Universal Queue Optimizer - Florida<br>
+        <p>© 2025 <b>Universal Queue Optimizer - Florida</b><br>
         smart analytics edition 🚀</p>
         <hr style="margin:0.8rem 0; border:0; border-top:1px solid rgba(255,255,255,0.3);">
-        <p style="font-size:0.85rem; opacity:0.8;">
+        <p style="font-size:0.85rem; opacity:0.8; line-height:1.4;">
             🧠 Designed & Developed by <b>Runsang&nbsp;Yu</b><br>
-            📧 <a href="mailto:yurunsang19@gmail.com" target="_blank" style="color:#58a6ff;">yurunsang19@gmail.com</a>
+            📧 <a href="mailto:yurunsang19@gmail.com" target="_blank" style="color:#58a6ff; text-decoration:none;">
+                yurunsang19@gmail.com
+            </a>
         </p>
     </div>
     """,
