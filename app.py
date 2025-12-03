@@ -123,6 +123,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# 📱 Mobile tip
+st.caption("📱 **Tip:** On mobile, tap the ☰ icon in the top-left corner to open Trip Settings.")
+
 st.title("🎢 Universal Queue Optimizer - Florida")
 
 MODEL_DIR = "model_result"
@@ -173,6 +176,14 @@ st.info("ℹ️ The app can only retrieve real weather forecasts up to **7 days 
 lat, lon = 28.4745, -81.4717
 temp_f, rain_prob = get_weather_forecast(lat, lon, selected_date)
 
+# 🌦 Determine emoji based on rain probability
+if rain_prob >= 60:
+    weather_icon = "🌧️"
+elif rain_prob >= 30:
+    weather_icon = "🌦"
+else:
+    weather_icon = "☀️"
+
 # 🌤 Sleek Glass Weather Widget
 st.markdown(
     f"""
@@ -188,7 +199,7 @@ st.markdown(
         text-align: center;
     ">
         <h3 style="margin-bottom:0.2rem; font-weight:700; font-size:1.4rem;">
-            ☀️ Weather Forecast
+            {weather_icon} Weather Forecast
         </h3>
         <p style="margin:0.2rem 0; font-size:1.05rem;">
             <b>{selected_date.strftime('%A, %b %d, %Y')}</b>
@@ -219,7 +230,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
+# ==========================================================
+# 5. Prediction logic
+# ==========================================================
 def infer_holiday_flags(selected_date):
     us_holidays = holidays.country_holidays('US', subdiv='FL', years=[selected_date.year])
     is_public = int(selected_date in us_holidays)
@@ -254,14 +267,14 @@ for ride in rides:
     pred_results.append({"ride": ride, "predicted_wait": wait_pred})
 
 # ==========================================================
-# 5. Visual Insights (Glass Leaderboard)
+# 6. Visual Insights (Glass Leaderboard)
 # ==========================================================
 if len(pred_results) > 0:
     pred_df = pd.DataFrame(pred_results)
     optimized_route = pred_df.sort_values("predicted_wait").reset_index(drop=True)
     optimized_route["order"] = optimized_route.index + 1
 
-    # 🏆 Glass-style leaderboard at top
+    # 🏆 Leaderboard
     fastest = optimized_route.nsmallest(5, "predicted_wait")
     slowest = optimized_route.nlargest(5, "predicted_wait")
 
@@ -282,7 +295,7 @@ if len(pred_results) > 0:
         unsafe_allow_html=True
     )
 
-    # 📊 Predicted Wait Times
+    # 📊 Bar chart
     st.subheader("📊 Predicted Wait Times by Ride")
     fig_bar = px.bar(
         optimized_route,
@@ -339,7 +352,7 @@ else:
     st.warning("Please select at least one ride that has a model to generate predictions.")
 
 # ==========================================================
-# 6. Sidebar Footer
+# 7. Sidebar Footer
 # ==========================================================
 df_park = df[df["park"] == selected_park]
 avg_wait = df_park.groupby("date")["wait_time"].mean().mean()
